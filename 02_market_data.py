@@ -18,14 +18,9 @@ from scipy.stats import skew, kurtosis, chi2
 # remember to modify the path to match your own directory
 directory = 'C:\\Users\Meva\\.spyder-py3\\data\\2021-2\\'
 # inputs
-ric = '^STOXX50E' # BBVA.MC MXN=X ^STOXX50E
+ric = 'VWS.CO' # BBVA.MC MXN=X ^STOXX50E
 path = directory + ric + '.csv' 
 raw_data = pd.read_csv(path)
-
-# # use prices
-# x = raw_data['Close'].values
-# x_description = 'market data ' + ric
-# nb_rows = len(x)
 
 # create table of returns
 t = pd.DataFrame()
@@ -37,14 +32,21 @@ t['return_close'] = t['close']/t['close_previous'] - 1
 t = t.dropna()
 t = t.reset_index(drop=True)
 
-x = t['return_close'].values
-x_description = 'market data ' + ric
-nb_rows = len(x)
+# plot timeseries of price
+plt.figure()
+plt.plot(t['date'],t['close'])
+plt.title('Time series real prices ' + ric)
+plt.xlabel('Time')
+plt.ylabel('Price')
+plt.show()
 
     
 '''
 Goal: create a Jarque-Bera normality test
 '''
+x = t['return_close'].values
+x_description = 'market data ' + ric
+nb_rows = len(x)
 
 x_mean = np.mean(x)
 x_std = np.std(x)

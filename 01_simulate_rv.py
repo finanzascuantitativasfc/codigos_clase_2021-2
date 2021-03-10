@@ -49,15 +49,11 @@ x_jb_stat = nb_sims/6*(x_skew**2 + 1/4*x_kurtosis**2)
 x_p_value = 1 - chi2.cdf(x_jb_stat, df=2)
 x_is_normal = (x_p_value > 0.05) # equivalently jb < 6
 
-# jb_list = []
-# jb_list.append(x_jb_stat)
-
 print('skewness is ' + str(x_skew))
 print('kurtosis is ' + str(x_kurtosis))
 print('JB statistic is ' + str(x_jb_stat))
 print('p-value ' + str(x_p_value))
 print('is normal ' + str(x_is_normal))
-
 
 # plot histogram
 plt.figure()
