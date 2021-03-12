@@ -68,6 +68,6 @@ print('is normal ' + str(x_is_normal))
 
 # plot histogram
 plt.figure()
-plt.hist(x,bins=50)
+plt.hist(x,bins=100)
 plt.title(x_description)
 plt.show()

@@ -13,13 +13,20 @@ import importlib
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, chi2
 
-data_type = 'real' # simulation real custom
-variable_name = 'VWS.CO' # normal student VWS.CO
+# import our own files and reload
+import file_classes
+importlib.reload(file_classes)
 
-dm = class_distribution_manager()
+inputs = {
+"data_type" : 'simulation', # simulation real custom
+"variable_name" : 'normal', # normal student exponential chi-square
+"degrees_freedom" : 2, # only used in student and chi-square
+"nb_sims" : 10**6
+}
 
-dm.load_timeseries(data_type, variable_name, bool_plot=True) # polymorphism
-dm.compute()
+dm = file_classes.distribution_manager(inputs)
+dm.load_timeseries() # polymorphism
 dm.plot_histogram()
 
-print(dm)
+# dm.compute()
+# print(dm)
