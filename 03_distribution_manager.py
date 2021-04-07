@@ -18,15 +18,14 @@ import file_classes
 importlib.reload(file_classes)
 
 inputs = {
-"data_type" : 'simulation', # simulation real custom
-"variable_name" : 'normal', # normal student exponential chi-square
-"degrees_freedom" : 2, # only used in student and chi-square
+"data_type" : 'real', # simulation real custom
+"variable_name" : 'VWS.CO', # normal student exponential chi-square uniform VWS.CO
+"degrees_freedom" : 9, # only used in student and chi-square
 "nb_sims" : 10**6
 }
 
 dm = file_classes.distribution_manager(inputs)
 dm.load_timeseries() # polymorphism
+dm.compute()
 dm.plot_histogram()
-
-# dm.compute()
-# print(dm)
+print(dm)
