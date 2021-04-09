@@ -26,9 +26,14 @@ class distribution_manager():
         self.std = None
         self.skew = None
         self.kurtosis = None # excess kurtosis
-        self.jb_stat = None
-        self.p_value = None
+        self.jb_stat = None # under normality of self.vec_returns this distributes as chi-squared with 2 degrees of freedom
+        self.p_value = None # equivalently jb < 6
         self.is_normal = None
+        self.sharpe = None
+        self.var_95 = None
+        self.percentile_25 = None
+        self.median = None
+        self.percentile_75 = None
         
         
     def __str__(self):
@@ -69,7 +74,9 @@ class distribution_manager():
         elif data_type == 'real':
             
             directory = 'C:\\Users\Meva\\.spyder-py3\\data\\2021-2\\' # hardcoded
+            
             ric = self.inputs['variable_name']
+            
             path = directory + ric + '.csv' 
             raw_data = pd.read_csv(path)
             t = pd.DataFrame()
@@ -103,6 +110,12 @@ class distribution_manager():
         self.jb_stat = self.nb_rows/6*(self.skew**2 + 1/4*self.kurtosis**2)
         self.p_value = 1 - chi2.cdf(self.jb_stat, df=2)
         self.is_normal = (self.p_value > 0.05) # equivalently jb < 6
+        self.sharpe = self.mean / self.std * np.sqrt(252) # annualised
+        self.var_95 = np.percentile(self.vec_returns,5)
+        self.cvar_95 = np.mean(self.vec_returns[self.vec_returns <= self.var_95])
+        self.percentile_25 = self.percentile(25)
+        self.median = np.median(self.vec_returns)
+        self.percentile_75 = self.percentile(75)
 
         
     def plot_str(self):
@@ -113,5 +126,16 @@ class distribution_manager():
             + ' | kurtosis ' + str(np.round(self.kurtosis,nb_decimals)) + '\n'\
             + 'Jarque Bera ' + str(np.round(self.jb_stat,nb_decimals))\
             + ' | p-value ' + str(np.round(self.p_value,nb_decimals))\
-            + ' | is normal ' + str(self.is_normal)
+            + ' | is normal ' + str(self.is_normal) + '\n'\
+            + 'Sharpe annual ' + str(np.round(self.sharpe,nb_decimals))\
+            + ' | VaR 95% ' + str(np.round(self.var_95,nb_decimals))\
+            + ' | CVaR 95% ' + str(np.round(self.cvar_95,nb_decimals)) + '\n'\
+            + 'percentile 25% ' + str(np.round(self.percentile_25,nb_decimals))\
+            + ' | median ' + str(np.round(self.median,nb_decimals))\
+            + ' | percentile 75% ' + str(np.round(self.percentile_75,nb_decimals))
         return plot_str
+    
+    
+    def percentile(self, pct):
+        percentile = np.percentile(self.vec_returns,pct)
+        return percentile

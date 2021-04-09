@@ -19,7 +19,7 @@ importlib.reload(file_classes)
 
 inputs = {
 "data_type" : 'real', # simulation real custom
-"variable_name" : 'VWS.CO', # normal student exponential chi-square uniform VWS.CO
+"variable_name" : '^VIX', # normal student exponential chi-square uniform VWS.CO
 "degrees_freedom" : 9, # only used in student and chi-square
 "nb_sims" : 10**6
 }
