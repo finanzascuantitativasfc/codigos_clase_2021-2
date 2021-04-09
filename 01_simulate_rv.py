@@ -13,11 +13,10 @@ import importlib
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, chi2
 
-print('Hello World!')
 
 nb_sims = 10**6
-df = 500
-dist_name = 'normal' # student normal exponential uniform chi-square
+df = 9
+dist_name = 'chi-square' # student normal exponential uniform chi-square
 dist_type = 'simulated RV' # real custom
 
 
@@ -49,6 +48,9 @@ x_jb_stat = nb_sims/6*(x_skew**2 + 1/4*x_kurtosis**2)
 x_p_value = 1 - chi2.cdf(x_jb_stat, df=2)
 x_is_normal = (x_p_value > 0.05) # equivalently jb < 6
 
+print(x_description)
+print('mean is ' + str(x_mean))
+print('standard deviation is ' + str(x_std))
 print('skewness is ' + str(x_skew))
 print('kurtosis is ' + str(x_kurtosis))
 print('JB statistic is ' + str(x_jb_stat))

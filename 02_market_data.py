@@ -16,9 +16,9 @@ from scipy.stats import skew, kurtosis, chi2
 
 # get market data
 # remember to modify the path to match your own directory
-directory = 'C:\\Users\Meva\\.spyder-py3\\data\\2021-2\\'
+directory = 'C:\\Users\Meva\\.spyder-py3\\data\\2021-2\\' # hardcoded
 # inputs
-ric = 'VWS.CO' # BBVA.MC MXN=X ^STOXX50E
+ric = '^FCHI' # BBVA.MC MXN=X ^STOXX50E
 path = directory + ric + '.csv' 
 raw_data = pd.read_csv(path)
 
@@ -59,6 +59,10 @@ x_is_normal = (x_p_value > 0.05) # equivalently jb < 6
 # jb_list = []
 # jb_list.append(x_jb_stat)
 
+print('---Real market data---')
+print('Ric is ' + ric)
+print('mean is ' + str(x_mean))
+print('standard deviation is ' + str(x_std))
 print('skewness is ' + str(x_skew))
 print('kurtosis is ' + str(x_kurtosis))
 print('JB statistic is ' + str(x_jb_stat))
@@ -68,6 +72,6 @@ print('is normal ' + str(x_is_normal))
 
 # plot histogram
 plt.figure()
-plt.hist(x,bins=50)
+plt.hist(x,bins=100)
 plt.title(x_description)
 plt.show()
