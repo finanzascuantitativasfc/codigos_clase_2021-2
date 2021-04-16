@@ -12,6 +12,12 @@ import importlib
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, chi2
 
+# import our own files and reload
+import file_classes
+importlib.reload(file_classes)
+import file_functions
+importlib.reload(file_functions)
+
 
 class distribution_manager():
     
@@ -26,7 +32,7 @@ class distribution_manager():
         self.std = None
         self.skew = None
         self.kurtosis = None # excess kurtosis
-        self.jb_stat = None # under normality of self.vec_returns this distributes as chi-squared with 2 degrees of freedom
+        self.jb_stat = None # under normality of self.vec_returns this distributes as chi-square with 2 degrees of freedom
         self.p_value = None # equivalently jb < 6
         self.is_normal = None
         self.sharpe = None
@@ -43,13 +49,14 @@ class distribution_manager():
         
     def load_timeseries(self):
         
-        data_type = self.inputs['data_type']
+        # data_type = self.inputs['data_type']
+        data_type = self.inputs.data_type
         
         if data_type == 'simulation':
             
-            nb_sims = self.inputs['nb_sims']
-            dist_name = self.inputs['variable_name']
-            degrees_freedom = self.inputs['degrees_freedom']
+            nb_sims = self.inputs.nb_sims
+            dist_name = self.inputs.variable_name
+            degrees_freedom = self.inputs.degrees_freedom
             
             if dist_name == 'normal':
                 x = np.random.standard_normal(nb_sims)
@@ -67,26 +74,13 @@ class distribution_manager():
                 x = np.random.chisquare(df=degrees_freedom, size=nb_sims)
                 self.description = data_type + ' ' + dist_name + ' | df = ' + str(degrees_freedom)
        
-            self.description = self.description
             self.nb_rows = nb_sims
             self.vec_returns = x
        
         elif data_type == 'real':
             
-            directory = 'C:\\Users\Meva\\.spyder-py3\\data\\2021-2\\' # hardcoded
-            
-            ric = self.inputs['variable_name']
-            
-            path = directory + ric + '.csv' 
-            raw_data = pd.read_csv(path)
-            t = pd.DataFrame()
-            t['date'] = pd.to_datetime(raw_data['Date'], dayfirst=True)
-            t['close'] = raw_data['Close']
-            t.sort_values(by='date', ascending=True)
-            t['close_previous'] = t['close'].shift(1)
-            t['return_close'] = t['close']/t['close_previous'] - 1
-            t = t.dropna()
-            t = t.reset_index(drop=True)
+            ric = self.inputs.variable_name
+            t = file_functions.load_timeseries(ric)
             
             self.data_table = t
             self.description = 'market data ' + ric
@@ -139,3 +133,12 @@ class distribution_manager():
     def percentile(self, pct):
         percentile = np.percentile(self.vec_returns,pct)
         return percentile
+    
+    
+class distribution_input():
+    
+    def __init__(self):
+        self.data_type = None # simulation real custom
+        self.variable_name = None # normal student exponential chi-square uniform VWS.CO
+        self.degrees_freedom = None # only used in simulation + student and chi-square
+        self.nb_sims = None # only in simulation
