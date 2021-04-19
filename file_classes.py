@@ -151,10 +151,10 @@ class capm_manager():
         
         
     def __str__(self):
-        return self.plot_str()
+        return self.str_self()
     
     
-    def plot_str(self):
+    def str_self(self):
         str_self = 'Linear regression | security ' + self.security\
             + ' | benchmark ' + self.benchmark + '\n'\
             + 'alpha (intercept) ' + str(self.intercept)\
@@ -202,7 +202,7 @@ class capm_manager():
     def plot_linear_regression(self):
         x = self.data_table['return_x'].values
         y = self.data_table['return_y'].values
-        str_title = 'Scatterplot of returns' + '\n' + self.plot_str()
+        str_title = 'Scatterplot of returns' + '\n' + self.str_self()
         plt.figure()
         plt.title(str_title)
         plt.scatter(x,y)
