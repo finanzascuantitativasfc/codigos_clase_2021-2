@@ -10,7 +10,7 @@ import matplotlib as mpl
 import scipy
 import importlib
 import matplotlib.pyplot as plt
-from scipy.stats import skew, kurtosis, chi2
+from scipy.stats import skew, kurtosis, chi2, linregress
 
 # import our own files and reload
 import file_classes
@@ -19,8 +19,7 @@ import file_functions
 importlib.reload(file_functions)
 
 
-class distribution_manager():
-    
+class distribution_manager(): 
     
     def __init__(self, inputs):
         self.inputs = inputs
@@ -135,6 +134,85 @@ class distribution_manager():
         return percentile
     
     
+class capm_manager():
+    
+    def __init__(self, benchmark, security):
+        self.benchmark = benchmark # variable x
+        self.security = security # variable y
+        self.nb_decimals = 4
+        self.data_table = None
+        self.slope = None
+        self.intercept = None
+        self.p_value = None
+        self.null_hypothesis = None
+        self.r_value = None
+        self.std_err = None
+        self.predictor_linreg = None
+        
+        
+    def __str__(self):
+        return self.plot_str()
+    
+    
+    def plot_str(self):
+        str_self = 'Linear regression | security ' + self.security\
+            + ' | benchmark ' + self.benchmark + '\n'\
+            + 'alpha (intercept) ' + str(self.intercept)\
+            + ' | beta (slope) ' + str(self.slope) + '\n'\
+            + 'p-value ' + str(self.p_value)\
+            + ' | null hypothesis ' + str(self.null_hypothesis) + '\n'\
+            + 'r-value (correl) ' + str(self.r_value)\
+            + ' | r-squared ' + str(self.r_squared)
+        return str_self
+    
+    
+    def load_timeseries(self):
+        self.data_table = file_functions.load_synchronised_timeseries(ric_x=self.benchmark, ric_y=self.security)
+    
+    
+    def compute(self):
+        # linear regression
+        x = self.data_table['return_x'].values
+        y = self.data_table['return_y'].values
+        slope, intercept, r_value, p_value, std_err = linregress(x,y)
+        self.slope = np.round(slope, self.nb_decimals)
+        self.intercept = np.round(intercept, self.nb_decimals)
+        self.p_value = np.round(p_value, self.nb_decimals) 
+        self.null_hypothesis = p_value > 0.05 # p_value < 0.05 --> reject null hypothesis
+        self.r_value = np.round(r_value, self.nb_decimals) # correlation coefficient
+        self.r_squared = np.round(r_value**2, self.nb_decimals) # pct of variance of y explained by x
+        self.predictor_linreg = intercept + slope*x
+        
+        
+    def plot_timeseries(self):
+        plt.figure(figsize=(12,5))
+        plt.title('Time series of prices')
+        plt.xlabel('Time')
+        plt.ylabel('Prices')
+        ax = plt.gca()
+        ax1 = self.data_table.plot(kind='line', x='date', y='price_x', ax=ax, grid=True,\
+                                  color='blue', label=self.benchmark)
+        ax2 = self.data_table.plot(kind='line', x='date', y='price_y', ax=ax, grid=True,\
+                                  color='red', secondary_y=True, label=self.security)
+        ax1.legend(loc=2)
+        ax2.legend(loc=1)
+        plt.show()
+    
+    
+    def plot_linear_regression(self):
+        x = self.data_table['return_x'].values
+        y = self.data_table['return_y'].values
+        str_title = 'Scatterplot of returns' + '\n' + self.plot_str()
+        plt.figure()
+        plt.title(str_title)
+        plt.scatter(x,y)
+        plt.plot(x, self.predictor_linreg, color='green')
+        plt.ylabel(self.security)
+        plt.xlabel(self.benchmark)
+        plt.grid()
+        plt.show()
+        
+    
 class distribution_input():
     
     def __init__(self):
@@ -142,3 +220,5 @@ class distribution_input():
         self.variable_name = None # normal student exponential chi-square uniform VWS.CO
         self.degrees_freedom = None # only used in simulation + student and chi-square
         self.nb_sims = None # only in simulation
+        
+    

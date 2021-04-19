@@ -19,7 +19,7 @@ importlib.reload(file_classes)
 
 inputs = file_classes.distribution_input()
 inputs.data_type = 'real'
-inputs.variable_name = 'EURUSD=X'
+inputs.variable_name = '^STOXX50E'
 inputs.degrees_freedom = 9
 inputs.nb_sims = 10**6
 
