@@ -17,15 +17,16 @@ from scipy.stats import skew, kurtosis, chi2
 import file_classes
 importlib.reload(file_classes)
 
-inputs = {
-"data_type" : 'real', # simulation real custom
-"variable_name" : 'VWS.CO', # normal student exponential chi-square uniform VWS.CO
-"degrees_freedom" : 9, # only used in student and chi-square
-"nb_sims" : 10**6
-}
+inputs = file_classes.distribution_input()
+inputs.data_type = 'real'
+inputs.variable_name = '^STOXX50E'
+inputs.degrees_freedom = 9
+inputs.nb_sims = 10**6
 
-dm = file_classes.distribution_manager(inputs)
-dm.load_timeseries() # polymorphism
-dm.compute()
-dm.plot_histogram()
-print(dm)
+dm = file_classes.distribution_manager(inputs) # initialise constructor
+dm.load_timeseries() # get the timeseries
+dm.compute() # compute returns and all different risk metrics
+dm.plot_histogram() # plot histogram
+print(dm) # write all data in console
+
+
