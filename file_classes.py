@@ -141,8 +141,8 @@ class capm_manager():
         self.security = security # variable y
         self.nb_decimals = 4
         self.data_table = None
-        self.slope = None
-        self.intercept = None
+        self.alpha = None
+        self.beta = None
         self.p_value = None
         self.null_hypothesis = None
         self.r_value = None
@@ -157,8 +157,8 @@ class capm_manager():
     def str_self(self):
         str_self = 'Linear regression | security ' + self.security\
             + ' | benchmark ' + self.benchmark + '\n'\
-            + 'alpha (intercept) ' + str(self.intercept)\
-            + ' | beta (slope) ' + str(self.slope) + '\n'\
+            + 'alpha (intercept) ' + str(self.alpha)\
+            + ' | beta (slope) ' + str(self.beta) + '\n'\
             + 'p-value ' + str(self.p_value)\
             + ' | null hypothesis ' + str(self.null_hypothesis) + '\n'\
             + 'r-value (correl) ' + str(self.r_value)\
@@ -175,8 +175,8 @@ class capm_manager():
         x = self.data_table['return_x'].values
         y = self.data_table['return_y'].values
         slope, intercept, r_value, p_value, std_err = linregress(x,y)
-        self.slope = np.round(slope, self.nb_decimals)
-        self.intercept = np.round(intercept, self.nb_decimals)
+        self.alpha = np.round(intercept, self.nb_decimals)
+        self.beta = np.round(slope, self.nb_decimals)
         self.p_value = np.round(p_value, self.nb_decimals) 
         self.null_hypothesis = p_value > 0.05 # p_value < 0.05 --> reject null hypothesis
         self.r_value = np.round(r_value, self.nb_decimals) # correlation coefficient
