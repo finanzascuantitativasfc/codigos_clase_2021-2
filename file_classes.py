@@ -22,7 +22,7 @@ importlib.reload(file_functions)
 class distribution_manager(): 
     
     def __init__(self, inputs):
-        self.inputs = inputs
+        self.inputs = inputs # distribution_inputs
         self.data_table = None
         self.description = None
         self.nb_rows = None
@@ -211,6 +211,85 @@ class capm_manager():
         plt.xlabel(self.benchmark)
         plt.grid()
         plt.show()
+
+
+class hedge_manager():
+    
+    def __init__(self, inputs):
+        self.inputs = inputs # hedge_inputs
+        self.benchmark = inputs.benchmark # the market in CAPM, in general ^STOXX50E
+        self.security = inputs.security # portfolio to hedge
+        self.hedge_securities = inputs.hedge_securities # hedge universe
+        self.nb_hedges = len(self.hedge_securities)
+        self.delta_portfolio = inputs.delta_portfolio
+        self.beta_portfolio = None
+        self.beta_portfolio_usd = None
+        self.betas = None
+        self.optimal_hedge = None
+        self.hedge_delta = None
+        self.hedge_beta_usd = None
+        
+    
+    def load_betas(self):
+        benchmark = self.benchmark
+        security = self.security
+        hedge_securities = self.hedge_securities
+        delta_portfolio = self.delta_portfolio
+        # compute beta for the portfolio
+        capm = file_classes.capm_manager(benchmark, security)
+        capm.load_timeseries()
+        capm.compute()
+        beta_portfolio = capm.beta
+        beta_portfolio_usd = beta_portfolio * delta_portfolio # mn USD
+        # print input
+        print('------')
+        print('Input portfolio:')
+        print('Delta mnUSD for ' + security + ' is ' + str(delta_portfolio))
+        print('Beta for ' + security + ' vs ' + benchmark + ' is ' + str(beta_portfolio))
+        print('Beta mnUSD for ' + security + ' vs ' + benchmark + ' is ' + str(beta_portfolio_usd))
+        # compute betas for the hedges
+        shape = [len(hedge_securities)]
+        betas = np.zeros(shape)
+        counter = 0
+        print('------')
+        print('Input hedges:')
+        for hedge_security in hedge_securities:
+            capm = file_classes.capm_manager(benchmark, hedge_security)
+            capm.load_timeseries()
+            capm.compute()
+            beta = capm.beta
+            print('Beta for hedge[' + str(counter) + '] = ' + hedge_security + ' vs ' + benchmark + ' is ' + str(beta))
+            betas[counter] = beta
+            counter += 1
+        
+        self.beta_portfolio = beta_portfolio
+        self.beta_portfolio_usd = beta_portfolio_usd
+        self.betas = betas
+        
+        
+    def compute(self):
+        # exact solution using matrix algebra
+        shape = [len(self.hedge_securities)]
+        deltas = np.ones(shape)
+        betas = self.betas
+        targets = -np.array([[self.delta_portfolio],[self.beta_portfolio_usd]])
+        mtx = np.transpose(np.column_stack((deltas,betas)))
+        self.optimal_hedge = np.linalg.inv(mtx).dot(targets)
+        self.hedge_delta = np.sum(self.optimal_hedge)
+        self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
+        # print result
+        print('------')
+        print('Optimisation result')
+        print('------')
+        print('Delta portfolio: ' + str(self.delta_portfolio))
+        print('Beta portfolio USD: ' + str(self.beta_portfolio_usd))
+        print('------')
+        print('Delta hedge: ' + str(self.hedge_delta))
+        print('Beta hedge USD: ' + str(self.hedge_beta_usd))
+        print('------')
+        print('Optimal hedge:')
+        print(self.optimal_hedge)
+        print('------')
         
     
 class distribution_input():
@@ -220,5 +299,14 @@ class distribution_input():
         self.variable_name = None # normal student exponential chi-square uniform VWS.CO
         self.degrees_freedom = None # only used in simulation + student and chi-square
         self.nb_sims = None # only in simulation
+        
+
+class hedge_input:
+    
+    def __init__(self):
+        self.benchmark = None # the market in CAPM, in general ^STOXX50E
+        self.security = 'BBVA.MC' # portfolio to hedge
+        self.hedge_securities =  ['^STOXX50E','^FCHI'] # hedge universe
+        self.delta_portfolio = None # in mn USD, default 10
         
     

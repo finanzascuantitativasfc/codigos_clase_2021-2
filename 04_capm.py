@@ -21,7 +21,7 @@ importlib.reload(file_functions)
 
 # inputs
 benchmark = '^STOXX50E' # variable x
-security = 'REP.MC' # variable y
+security = 'VWS.CO' # variable y
 
 capm = file_classes.capm_manager(benchmark, security)
 capm.load_timeseries()
