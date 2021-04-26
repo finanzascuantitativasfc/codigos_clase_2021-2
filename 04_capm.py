@@ -20,12 +20,12 @@ import file_functions
 importlib.reload(file_functions)
 
 # inputs
-benchmark = '^STOXX50E' # variable x
-security = 'VWS.CO' # variable y
+benchmark = '^GDAXI' # variable x
+security = '^FCHI' # variable y
 
 capm = file_classes.capm_manager(benchmark, security)
 capm.load_timeseries()
-capm.plot_timeseries()
+# capm.plot_timeseries()
 capm.compute()
 capm.plot_linear_regression()
 print(capm)

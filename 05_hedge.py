@@ -22,8 +22,11 @@ importlib.reload(file_functions)
 # inputs
 inputs = file_classes.hedge_input()
 inputs.benchmark = '^STOXX50E'
-inputs.security = 'RDSa.AS' # Reuters Identification Code
-inputs.hedge_securities =  ['FP.PA','BP.L']
+# inputs.security = 'ENI.MI'
+inputs.security = 'BBVA.MC'
+# inputs.hedge_securities =  ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP']
+# inputs.hedge_securities =  ['EQNR.OL','REP.MC']
+inputs.hedge_securities =  ['^GDAXI','^FCHI']
 inputs.delta_portfolio = 10 # mn USD
 
 # computations

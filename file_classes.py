@@ -145,7 +145,8 @@ class capm_manager():
         self.beta = None
         self.p_value = None
         self.null_hypothesis = None
-        self.r_value = None
+        self.correlation = None
+        self.r_squared = None
         self.std_err = None
         self.predictor_linreg = None
         
@@ -161,7 +162,7 @@ class capm_manager():
             + ' | beta (slope) ' + str(self.beta) + '\n'\
             + 'p-value ' + str(self.p_value)\
             + ' | null hypothesis ' + str(self.null_hypothesis) + '\n'\
-            + 'r-value (correl) ' + str(self.r_value)\
+            + 'correl (r-value) ' + str(self.correlation)\
             + ' | r-squared ' + str(self.r_squared)
         return str_self
     
@@ -179,7 +180,7 @@ class capm_manager():
         self.beta = np.round(slope, self.nb_decimals)
         self.p_value = np.round(p_value, self.nb_decimals) 
         self.null_hypothesis = p_value > 0.05 # p_value < 0.05 --> reject null hypothesis
-        self.r_value = np.round(r_value, self.nb_decimals) # correlation coefficient
+        self.correlation = np.round(r_value, self.nb_decimals) # correlation coefficient
         self.r_squared = np.round(r_value**2, self.nb_decimals) # pct of variance of y explained by x
         self.predictor_linreg = intercept + slope*x
         
@@ -274,6 +275,7 @@ class hedge_manager():
         betas = self.betas
         targets = -np.array([[self.delta_portfolio],[self.beta_portfolio_usd]])
         mtx = np.transpose(np.column_stack((deltas,betas)))
+        
         self.optimal_hedge = np.linalg.inv(mtx).dot(targets)
         self.hedge_delta = np.sum(self.optimal_hedge)
         self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
