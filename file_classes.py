@@ -17,6 +17,7 @@ import file_classes
 importlib.reload(file_classes)
 import file_functions
 importlib.reload(file_functions)
+from scipy.optimize import minimize
 
 
 class distribution_manager(): 
@@ -268,20 +269,41 @@ class hedge_manager():
         self.betas = betas
         
         
-    def compute(self):
+    def compute(self, regularisation=0.0):
+        # numerical solution
+        dimensions = len(self.hedge_securities)
+        x = np.zeros([dimensions,1])
+        portfolio_delta = self.delta_portfolio
+        portfolio_beta = self.beta_portfolio_usd
+        betas = self.betas
+        optimal_result = minimize(fun=file_functions.cost_function_hedge, x0=x, args=(self.delta_portfolio, self.beta_portfolio_usd, self.betas, regularisation))
+        self.optimal_hedge = optimal_result.x
+        self.hedge_delta = np.sum(self.optimal_hedge)
+        self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
+        self.print_result('numerical')
+        
+        
+    def compute_exact(self):
         # exact solution using matrix algebra
-        shape = [len(self.hedge_securities)]
+        n = len(self.hedge_securities)
+        if n != 2:
+            print('------')
+            print('Cannot compute exact solution because n = ' + str(n) + ' =/= 2')
+            return
+        shape = [n]
         deltas = np.ones(shape)
         betas = self.betas
         targets = -np.array([[self.delta_portfolio],[self.beta_portfolio_usd]])
         mtx = np.transpose(np.column_stack((deltas,betas)))
-        
         self.optimal_hedge = np.linalg.inv(mtx).dot(targets)
         self.hedge_delta = np.sum(self.optimal_hedge)
         self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
-        # print result
+        self.print_result('exact')
+        
+    
+    def print_result(self, algo_type):
         print('------')
-        print('Optimisation result')
+        print('Optimisation result - ' + algo_type + ' solution')
         print('------')
         print('Delta portfolio: ' + str(self.delta_portfolio))
         print('Beta portfolio USD: ' + str(self.beta_portfolio_usd))
@@ -291,7 +313,6 @@ class hedge_manager():
         print('------')
         print('Optimal hedge:')
         print(self.optimal_hedge)
-        print('------')
         
     
 class distribution_input():
