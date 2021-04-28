@@ -277,7 +277,7 @@ class hedge_manager():
         portfolio_delta = self.portfolio_delta
         portfolio_beta = self.portfolio_beta
         betas = self.betas
-        optimal_result = minimize(fun=file_functions.cost_function_hedge, x0=x, args=(self.delta_portfolio, self.beta_portfolio_usd, self.betas, regularisation))
+        optimal_result = minimize(fun=file_functions.cost_function_hedge, x0=x, args=(self.portfolio_delta, self.portfolio_beta_usd, self.betas, regularisation))
         self.optimal_hedge = optimal_result.x
         self.hedge_delta = np.sum(self.optimal_hedge)
         self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
@@ -306,8 +306,8 @@ class hedge_manager():
         print('------')
         print('Optimisation result - ' + algo_type + ' solution')
         print('------')
-        print('Delta portfolio: ' + str(self.delta_portfolio))
-        print('Beta portfolio USD: ' + str(self.beta_portfolio_usd))
+        print('Delta portfolio: ' + str(self.portfolio_delta))
+        print('Beta portfolio USD: ' + str(self.portfolio_beta_usd))
         print('------')
         print('Delta hedge: ' + str(self.hedge_delta))
         print('Beta hedge USD: ' + str(self.hedge_beta_usd))
