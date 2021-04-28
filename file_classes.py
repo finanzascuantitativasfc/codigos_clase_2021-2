@@ -223,9 +223,9 @@ class hedge_manager():
         self.security = inputs.security # portfolio to hedge
         self.hedge_securities = inputs.hedge_securities # hedge universe
         self.nb_hedges = len(self.hedge_securities)
-        self.delta_portfolio = inputs.delta_portfolio
-        self.beta_portfolio = None
-        self.beta_portfolio_usd = None
+        self.portfolio_delta = inputs.delta_portfolio
+        self.portfolio_beta = None
+        self.portfolio_beta_usd = None
         self.betas = None
         self.optimal_hedge = None
         self.hedge_delta = None
@@ -237,19 +237,19 @@ class hedge_manager():
         benchmark = self.benchmark
         security = self.security
         hedge_securities = self.hedge_securities
-        delta_portfolio = self.delta_portfolio
+        portfolio_delta = self.portfolio_delta
         # compute beta for the portfolio
         capm = file_classes.capm_manager(benchmark, security)
         capm.load_timeseries()
         capm.compute()
-        beta_portfolio = capm.beta
-        beta_portfolio_usd = beta_portfolio * delta_portfolio # mn USD
+        portfolio_beta = capm.beta
+        portfolio_beta_usd = portfolio_beta * portfolio_delta # mn USD
         # print input
         print('------')
         print('Input portfolio:')
-        print('Delta mnUSD for ' + security + ' is ' + str(delta_portfolio))
-        print('Beta for ' + security + ' vs ' + benchmark + ' is ' + str(beta_portfolio))
-        print('Beta mnUSD for ' + security + ' vs ' + benchmark + ' is ' + str(beta_portfolio_usd))
+        print('Delta mnUSD for ' + security + ' is ' + str(portfolio_delta))
+        print('Beta for ' + security + ' vs ' + benchmark + ' is ' + str(portfolio_beta))
+        print('Beta mnUSD for ' + security + ' vs ' + benchmark + ' is ' + str(portfolio_beta_usd))
         # compute betas for the hedges
         shape = [len(hedge_securities)]
         betas = np.zeros(shape)
@@ -265,8 +265,8 @@ class hedge_manager():
             betas[counter] = beta
             counter += 1
         
-        self.beta_portfolio = beta_portfolio
-        self.beta_portfolio_usd = beta_portfolio_usd
+        self.portfolio_beta = portfolio_beta
+        self.portfolio_beta_usd = portfolio_beta_usd
         self.betas = betas
         
         
@@ -274,8 +274,8 @@ class hedge_manager():
         # numerical solution
         dimensions = len(self.hedge_securities)
         x = np.zeros([dimensions,1])
-        portfolio_delta = self.delta_portfolio
-        portfolio_beta = self.beta_portfolio_usd
+        portfolio_delta = self.portfolio_delta
+        portfolio_beta = self.portfolio_beta
         betas = self.betas
         optimal_result = minimize(fun=file_functions.cost_function_hedge, x0=x, args=(self.delta_portfolio, self.beta_portfolio_usd, self.betas, regularisation))
         self.optimal_hedge = optimal_result.x

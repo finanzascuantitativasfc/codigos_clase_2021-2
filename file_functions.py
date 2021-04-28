@@ -65,12 +65,12 @@ def load_synchronised_timeseries(ric_x, ric_y):
     return t
     
     
-def cost_function_hedge(x, delta_portfolio, beta_portfolio_usd, betas, regularisation):
+def cost_function_hedge(x, portfolio_delta, portfolio_beta_usd, betas, regularisation):
     
     dimensions = len(x)
     deltas = np.ones([dimensions])
-    f_delta = (np.transpose(deltas).dot(x).item() + delta_portfolio)**2
-    f_beta = (np.transpose(betas).dot(x).item() + beta_portfolio_usd)**2
+    f_delta = (np.transpose(deltas).dot(x).item() + portfolio_delta)**2
+    f_beta = (np.transpose(betas).dot(x).item() + portfolio_beta_usd)**2
     f_penalty = regularisation*(np.sum(x**2))
     f = f_delta + f_beta + f_penalty
     
