@@ -230,6 +230,7 @@ class hedge_manager():
         self.optimal_hedge = None
         self.hedge_delta = None
         self.hedge_beta_usd = None
+        self.regularisation = 0.0
         
     
     def load_betas(self):
@@ -280,6 +281,7 @@ class hedge_manager():
         self.optimal_hedge = optimal_result.x
         self.hedge_delta = np.sum(self.optimal_hedge)
         self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
+        self.regularisation = regularisation
         self.print_result('numerical')
         
         
