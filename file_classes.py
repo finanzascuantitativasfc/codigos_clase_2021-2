@@ -285,13 +285,12 @@ class hedge_manager():
         
     def compute_exact(self):
         # exact solution using matrix algebra
-        n = len(self.hedge_securities)
-        if n != 2:
+        dimensions = len(self.hedge_securities)
+        if dimensions != 2:
             print('------')
-            print('Cannot compute exact solution because n = ' + str(n) + ' =/= 2')
+            print('Cannot compute exact solution because dimensions = ' + str(dimensions) + ' =/= 2')
             return
-        shape = [n]
-        deltas = np.ones(shape)
+        deltas = np.ones([dimensions])
         betas = self.betas
         targets = -np.array([[self.delta_portfolio],[self.beta_portfolio_usd]])
         mtx = np.transpose(np.column_stack((deltas,betas)))
