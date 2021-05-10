@@ -24,13 +24,23 @@ importlib.reload(file_functions)
 
 nb_decimals = 6 # 3 4 5 6
 scale = 252 # 1 252
-notional = 15 # mnUSD
+notional = 300 # mnUSD
 
-rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
-        'GLE.PA','HSBA.L','SAN.MC','UBSG.SW','XLF']
+# rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
+#         'GLE.PA','HSBA.L','SAN.MC','UBSG.SW','XLF']
     
 # rics = ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP',\
 #         'SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
+
+# rics = ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP'] # oils
+
+# rics = ['SGRE.MC','VWS.CO','ORSTED.CO'] # renewables EU
+
+# rics = ['SGRE.MC','VWS.CO'] # renewables EU
+    
+# rics = ['FSLR','NEE'] # renewables USA
+
+rics = ['^GSPC','^VIX'] # renewables USA
 
 
 # # compute covariance matrix via np.cov
