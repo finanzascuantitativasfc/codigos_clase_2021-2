@@ -26,8 +26,8 @@ nb_decimals = 6 # 3 4 5 6
 scale = 252 # 1 252
 notional = 300 # mnUSD
 
-# rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
-#         'GLE.PA','HSBA.L','SAN.MC','UBSG.SW','XLF']
+rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
+        'GLE.PA','HSBA.L','SAN.MC','UBSG.SW','XLF']
     
 # rics = ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP',\
 #         'SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
@@ -40,7 +40,7 @@ notional = 300 # mnUSD
     
 # rics = ['FSLR','NEE'] # renewables USA
 
-rics = ['^GSPC','^VIX'] # renewables USA
+# rics = ['^GSPC','^VIX'] # renewables USA
 
 
 # # compute covariance matrix via np.cov
@@ -110,7 +110,6 @@ print(mtx_covar)
 print('----')
 print('Correlation matrix:')
 print(mtx_correl)
-
 print('----')
 print('Eigenvalues:')
 print(eigenvalues)

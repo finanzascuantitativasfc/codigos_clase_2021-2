@@ -11,6 +11,7 @@ import scipy
 import importlib
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, chi2, linregress
+from numpy import linalg as LA
 
 # import our own files and reload
 import file_classes
@@ -135,6 +136,17 @@ class distribution_manager():
         return percentile
     
     
+    
+class distribution_input():
+    
+    def __init__(self):
+        self.data_type = None # simulation real custom
+        self.variable_name = None # normal student exponential chi-square uniform VWS.CO
+        self.degrees_freedom = None # only used in simulation + student and chi-square
+        self.nb_sims = None # only in simulation
+        
+    
+    
 class capm_manager():
     
     def __init__(self, benchmark, security):
@@ -215,6 +227,7 @@ class capm_manager():
         plt.show()
 
 
+
 class hedge_manager():
     
     def __init__(self, inputs):
@@ -274,10 +287,8 @@ class hedge_manager():
         # numerical solution
         dimensions = len(self.hedge_securities)
         x = np.zeros([dimensions,1])
-        portfolio_delta = self.portfolio_delta
-        portfolio_beta = self.portfolio_beta
         betas = self.betas
-        optimal_result = minimize(fun=file_functions.cost_function_hedge, x0=x, args=(self.portfolio_delta, self.portfolio_beta_usd, self.betas, regularisation))
+        optimal_result = minimize(fun=file_functions.cost_function_hedge, x0=x, args=(self.portfolio_delta, self.portfolio_beta_usd, betas, regularisation))
         self.optimal_hedge = optimal_result.x
         self.hedge_delta = np.sum(self.optimal_hedge)
         self.hedge_beta_usd = np.transpose(betas).dot(self.optimal_hedge).item()
@@ -315,22 +326,155 @@ class hedge_manager():
         print('Optimal hedge:')
         print(self.optimal_hedge)
         
-    
-class distribution_input():
-    
-    def __init__(self):
-        self.data_type = None # simulation real custom
-        self.variable_name = None # normal student exponential chi-square uniform VWS.CO
-        self.degrees_freedom = None # only used in simulation + student and chi-square
-        self.nb_sims = None # only in simulation
-        
 
-class hedge_input:
-    
-    def __init__(self):
-        self.benchmark = None # the market in CAPM, in general ^STOXX50E
-        self.security = 'BBVA.MC' # portfolio to hedge
-        self.hedge_securities =  ['^STOXX50E','^FCHI'] # hedge universe
-        self.delta_portfolio = None # in mn USD, default 10
         
+class hedge_input:
+   
+   def __init__(self):
+       self.benchmark = None # the market in CAPM, in general ^STOXX50E
+       self.security = 'BBVA.MC' # portfolio to hedge
+       self.hedge_securities =  ['^STOXX50E','^FCHI'] # hedge universe
+       self.delta_portfolio = None # in mn USD, default 10   
+
+
+
+class portfolio_manager:
+    
+    def __init__(self, rics, notional):
+        self.rics = rics
+        self.size = len(rics)
+        self.notional = notional
+        self.nb_decimals = 6
+        self.scale = 252
+        self.covariance_matrix = None
+        self.correlation_matrix = None
+        self.returns = None
+        self.volatilities = None
+        
+        
+    def compute_covariance_matrix(self, bool_print=True):
+        # compute variance-covariance matrix by pairwise covariances
+        rics = self.rics
+        size = len(rics)
+        mtx_covar = np.zeros([size,size])
+        mtx_correl = np.zeros([size,size])
+        vec_returns = np.zeros([size,1])
+        vec_volatilities = np.zeros([size,1])
+        returns = []
+        for i in range(size):
+            ric_x = rics[i]
+            for j in range(i+1):
+                ric_y = rics[j]
+                t = file_functions.load_synchronised_timeseries(ric_x, ric_y)
+                ret_x = t['return_x'].values
+                ret_y = t['return_y'].values
+                returns = [ret_x, ret_y]
+                # covariances
+                temp_mtx = np.cov(returns)
+                temp_covar = self.scale*temp_mtx[0][1]
+                temp_covar = np.round(temp_covar,self.nb_decimals)
+                mtx_covar[i][j] = temp_covar
+                mtx_covar[j][i] = temp_covar
+                # correlations
+                temp_mtx = np.corrcoef(returns)
+                temp_correl = temp_mtx[0][1]
+                temp_correl = np.round(temp_correl,self.nb_decimals)
+                mtx_correl[i][j] = temp_correl
+                mtx_correl[j][i] = temp_correl
+                if j == 0:
+                    temp_ret = ret_x
+            # returns
+            temp_mean = np.round(self.scale*np.mean(temp_ret), self.nb_decimals)
+            vec_returns[i] = temp_mean
+            # volatilities
+            temp_volatility = np.round(np.sqrt(self.scale)*np.std(temp_ret), self.nb_decimals)
+            vec_volatilities[i] = temp_volatility
+        # compute eigenvalues and eigenvectors for symmetric matrices
+        eigenvalues, eigenvectors = LA.eigh(mtx_covar)
+        
+        self.covariance_matrix = mtx_covar
+        self.correlation_matrix = mtx_correl
+        self.returns = vec_returns
+        self.volatilities = vec_volatilities
+        self.eigenvalues = eigenvalues
+        self.eigenvectors = eigenvectors
+        
+        if bool_print:
+            print('----')
+            print('Securities:')
+            print(self.rics)
+            print('----')
+            print('Returns (annualised):')
+            print(self.returns)
+            print('----')
+            print('Volatilities (annualised):')
+            print(self.volatilities)
+            print('----')
+            print('Variance-covariance matrix (annualised):')
+            print(self.covariance_matrix)
+            print('----')
+            print('Correlation matrix:')
+            print(self.correlation_matrix)
+            print('----')
+            print('Eigenvalues:')
+            print(self.eigenvalues)
+            print('----')
+            print('Eigenvectors:')
+            print(self.eigenvectors)
+            
+            
+    def compute_portfolio(self, portfolio_type='default'):
+        
+        portfolio = portfolio_item(self.rics, self.notional)
+        
+        if portfolio_type == 'min-variance':
+            portfolio.type = portfolio_type
+            portfolio.variance_explained = self.eigenvalues[0] / sum(abs(self.eigenvalues))
+            eigenvector = self.eigenvectors[:,0]
+            if max(eigenvector) < 0:
+                eigenvector = - eigenvector
+            portfolio.weights = self.notional * eigenvector / sum(abs(eigenvector))
+            
+        elif portfolio_type == 'pca':
+            portfolio.type = portfolio_type
+            portfolio.variance_explained = self.eigenvalues[-1] / sum(abs(self.eigenvalues))
+            eigenvector = self.eigenvectors[:,-1]
+            if max(eigenvector) < 0:
+                eigenvector = - eigenvector
+            portfolio.weights = self.notional * eigenvector / sum(abs(eigenvector))
+            
+        elif portfolio_type == 'default' or portfolio_type == 'equi-weight':
+            portfolio.type = 'equi-weight'
+            portfolio.weights = (self.notional / self.size) * np.ones([self.size])
+        
+        portfolio.delta = sum(portfolio.weights)
+        
+        return portfolio
+ 
+            
+
+class portfolio_item():
+    
+    def __init__(self, rics, notional):
+        self.rics = rics
+        self.notional = notional
+        self.type = ''
+        self.weights = []
+        self.delta = 0.0
+        self.variance_explained = None
+
+
+    def summary(self):
+        print('-----')
+        print('Portfolio type: ' + self.type)
+        print('Rics:')
+        print(self.rics)
+        print('Weights:')
+        print(self.weights)
+        print('Notional (mnUSD): ' + str(self.notional))
+        print('Delta (mnUSD): ' + str(self.delta))
+        if not self.variance_explained == None:
+            print('Variance explained: ' + str(self.variance_explained))
+
+    
     

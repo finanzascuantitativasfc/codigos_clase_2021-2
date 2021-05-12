@@ -29,4 +29,3 @@ capm.load_timeseries()
 capm.compute()
 capm.plot_linear_regression()
 print(capm)
-
