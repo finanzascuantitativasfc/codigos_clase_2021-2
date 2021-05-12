@@ -355,7 +355,7 @@ class portfolio_manager:
     def compute_covariance_matrix(self, bool_print=True):
         # compute variance-covariance matrix by pairwise covariances
         rics = self.rics
-        size = len(rics)
+        size = self.size
         mtx_covar = np.zeros([size,size])
         mtx_correl = np.zeros([size,size])
         vec_returns = np.zeros([size,1])
