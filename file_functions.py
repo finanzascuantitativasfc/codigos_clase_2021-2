@@ -79,6 +79,7 @@ def cost_function_hedge(x, portfolio_delta, portfolio_beta_usd, betas, regularis
 
 def compute_portfolio_variance(x, covariance_matrix):
     variance = np.dot(x.T, np.dot(covariance_matrix, x)).item()
+    
     return variance
     
 
@@ -90,6 +91,7 @@ def compute_portfolio_volatility(x, covariance_matrix):
     if variance <= 0.0:
         return 0.0
     volatility = np.sqrt(variance)
+    
     return volatility
     
     
