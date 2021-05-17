@@ -31,17 +31,16 @@ port_mgr = file_classes.portfolio_manager(rics, notional)
 port_mgr.compute_covariance_matrix(bool_print=False)
 
 port_min_var = port_mgr.compute_portfolio('min-variance')
-x_min_var = port_min_var.weights
 port_min_var.summary()
 
 port_pca = port_mgr.compute_portfolio('pca')
-x_pca = port_pca.weights
 port_pca.summary()
 
 port_equi = port_mgr.compute_portfolio('equi-weight')
-x_equi = port_equi.weights
 port_equi.summary()
 
+port_markowitz = port_mgr.compute_portfolio('markowitz',target_return=0.05)
+port_markowitz.summary()
 
 
 

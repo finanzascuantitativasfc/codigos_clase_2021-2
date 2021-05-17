@@ -11,6 +11,7 @@ import scipy
 import importlib
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, chi2, linregress
+from scipy.optimize import minimize
 from numpy import linalg as LA
 
 # import our own files and reload
@@ -423,7 +424,7 @@ class portfolio_manager:
             print(self.eigenvectors)
             
             
-    def compute_portfolio(self, portfolio_type='default'):
+    def compute_portfolio(self, portfolio_type='default', target_return=None):
         
         portfolio = portfolio_item(self.rics, self.notional)
         
@@ -433,7 +434,7 @@ class portfolio_manager:
             eigenvector = self.eigenvectors[:,0]
             if max(eigenvector) < 0:
                 eigenvector = - eigenvector
-            portfolio.weights = self.notional * eigenvector / sum(abs(eigenvector))
+            weights_normalised = eigenvector / sum(abs(eigenvector))
             
         elif portfolio_type == 'pca':
             portfolio.type = portfolio_type
@@ -441,13 +442,34 @@ class portfolio_manager:
             eigenvector = self.eigenvectors[:,-1]
             if max(eigenvector) < 0:
                 eigenvector = - eigenvector
-            portfolio.weights = self.notional * eigenvector / sum(abs(eigenvector))
+            weights_normalised = eigenvector / sum(abs(eigenvector))
             
         elif portfolio_type == 'default' or portfolio_type == 'equi-weight':
             portfolio.type = 'equi-weight'
-            portfolio.weights = (self.notional / self.size) * np.ones([self.size])
+            weights_normalised = 1 / self.size * np.ones([self.size])
+            
+        elif portfolio_type == 'markowitz':
+            portfolio.type = portfolio_type
+            if target_return == None:
+                target_return = np.mean(self.returns)
+            portfolio.target_return = target_return    
+            # initialise optimisation
+            x = np.zeros([self.size,1])
+            # initialise constraints
+            cons = [{"type": "eq", "fun": lambda x: np.transpose(self.returns).dot(x).item() - target_return},\
+                    {"type": "eq", "fun": lambda x: sum(abs(x)) - 1}]
+            bnds = [(0, None) for i in range(self.size)]
+            # compute optimisation
+            res = minimize(file_functions.compute_portfolio_variance, x, args=(self.covariance_matrix), constraints=cons, bounds=bnds)
+            weights_normalised = res.x
         
-        portfolio.delta = sum(portfolio.weights)
+        weights = self.notional * weights_normalised
+        portfolio.weights = weights
+        portfolio.delta = sum(weights)
+        portfolio.pnl_annual = np.transpose(self.returns).dot(weights).item()
+        portfolio.return_annual = np.transpose(self.returns).dot(weights_normalised).item()
+        portfolio.volatility_annual = file_functions.compute_portfolio_volatility(weights_normalised, self.covariance_matrix)
+        portfolio.sharpe_annual = portfolio.return_annual / portfolio.volatility_annual
         
         return portfolio
  
@@ -462,6 +484,11 @@ class portfolio_item():
         self.weights = []
         self.delta = 0.0
         self.variance_explained = None
+        self.pnl_annual = None
+        self.target_return = None
+        self.return_annual = None
+        self.volatility_annual = None
+        self.sharpe_annual = None
 
 
     def summary(self):
@@ -475,6 +502,13 @@ class portfolio_item():
         print('Delta (mnUSD): ' + str(self.delta))
         if not self.variance_explained == None:
             print('Variance explained: ' + str(self.variance_explained))
-
-    
-    
+        if not self.pnl_annual == None:
+            print('Profit and loss annual: ' + str(self.pnl_annual))
+        if not self.target_return == None:
+            print('Target return: ' + str(self.target_return))
+        if not self.return_annual == None:
+            print('Return annual: ' + str(self.return_annual))
+        if not self.volatility_annual == None:
+            print('Volatility annual: ' + str(self.volatility_annual))
+        if not self.sharpe_annual == None:
+            print('Sharpe ratio annual: ' + str(self.sharpe_annual))
