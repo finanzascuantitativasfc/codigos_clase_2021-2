@@ -426,7 +426,7 @@ class portfolio_manager:
             
     def compute_portfolio(self, portfolio_type='default', target_return=None):
         
-        portfolio = portfolio_item(self.rics, self.notional)
+        portfolio = portfolio_item(self.rics)
         
         if portfolio_type == 'min-variance':
             portfolio.type = portfolio_type
@@ -435,6 +435,37 @@ class portfolio_manager:
             if max(eigenvector) < 0:
                 eigenvector = - eigenvector
             weights_normalised = eigenvector / sum(abs(eigenvector))
+           
+        elif portfolio_type == 'min-variance-l1':
+            portfolio.type = portfolio_type   
+            # initialise optimisation
+            x = np.zeros([self.size,1])
+            # initialise constraints
+            cons = [{"type": "eq", "fun": lambda x: sum(abs(x)) - 1}] # unitary in norm L1
+            # compute optimisation
+            res = minimize(file_functions.compute_portfolio_variance, x, args=(self.covariance_matrix), constraints=cons)
+            weights_normalised = res.x
+            
+        elif portfolio_type == 'min-variance-l2':
+            portfolio.type = portfolio_type   
+            # initialise optimisation
+            x = np.zeros([self.size,1])
+            # initialise constraints
+            cons = [{"type": "eq", "fun": lambda x: sum(x**2) - 1}] # unitary in norm L2
+            # compute optimisation
+            res = minimize(file_functions.compute_portfolio_variance, x, args=(self.covariance_matrix), constraints=cons)
+            weights_normalised = res.x / sum(abs(res.x))
+           
+        elif portfolio_type == 'long-only':
+            portfolio.type = portfolio_type   
+            # initialise optimisation
+            x = np.zeros([self.size,1])
+            # initialise constraints
+            cons = [{"type": "eq", "fun": lambda x: sum(abs(x)) - 1}]
+            bnds = [(0, None) for i in range(self.size)]
+            # compute optimisation
+            res = minimize(file_functions.compute_portfolio_variance, x, args=(self.covariance_matrix), constraints=cons, bounds=bnds)
+            weights_normalised = res.x
             
         elif portfolio_type == 'pca':
             portfolio.type = portfolio_type
@@ -447,6 +478,11 @@ class portfolio_manager:
         elif portfolio_type == 'default' or portfolio_type == 'equi-weight':
             portfolio.type = 'equi-weight'
             weights_normalised = 1 / self.size * np.ones([self.size])
+            
+        elif portfolio_type == 'volatility-weighted':
+            portfolio.type = portfolio_type
+            x = 1 / self.volatilities
+            weights_normalised = 1 / np.sum(x) * x
             
         elif portfolio_type == 'markowitz':
             portfolio.type = portfolio_type
@@ -464,11 +500,14 @@ class portfolio_manager:
             weights_normalised = res.x
         
         weights = self.notional * weights_normalised
+        
         portfolio.weights = weights
+        portfolio.notional = sum(abs(weights))
         portfolio.delta = sum(weights)
-        portfolio.pnl_annual = np.transpose(self.returns).dot(weights).item()
+        portfolio.pnl_annual_usd = np.transpose(self.returns).dot(weights).item()
         portfolio.return_annual = np.transpose(self.returns).dot(weights_normalised).item()
         portfolio.volatility_annual = file_functions.compute_portfolio_volatility(weights_normalised, self.covariance_matrix)
+        portfolio.volatility_annual_usd = file_functions.compute_portfolio_volatility(weights, self.covariance_matrix)
         portfolio.sharpe_annual = portfolio.return_annual / portfolio.volatility_annual
         
         return portfolio
@@ -477,14 +516,15 @@ class portfolio_manager:
 
 class portfolio_item():
     
-    def __init__(self, rics, notional):
+    def __init__(self, rics):
         self.rics = rics
-        self.notional = notional
+        self.notional = 0.0
         self.type = ''
         self.weights = []
         self.delta = 0.0
         self.variance_explained = None
-        self.pnl_annual = None
+        self.pnl_annual_usd = None
+        self.volatility_annual_usd = None
         self.target_return = None
         self.return_annual = None
         self.volatility_annual = None
@@ -502,8 +542,10 @@ class portfolio_item():
         print('Delta (mnUSD): ' + str(self.delta))
         if not self.variance_explained == None:
             print('Variance explained: ' + str(self.variance_explained))
-        if not self.pnl_annual == None:
-            print('Profit and loss annual: ' + str(self.pnl_annual))
+        if not self.pnl_annual_usd == None:
+            print('Profit and loss annual (mn USD): ' + str(self.pnl_annual_usd))
+        if not self.volatility_annual_usd == None:
+            print('Volatility annual (mn USD): ' + str(self.volatility_annual_usd))
         if not self.target_return == None:
             print('Target return: ' + str(self.target_return))
         if not self.return_annual == None:
