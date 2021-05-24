@@ -95,3 +95,83 @@ def compute_portfolio_volatility(x, covariance_matrix):
     return volatility
     
     
+def compute_efficient_frontier(rics, notional, target_return, include_min_variance):
+    # special portfolios    
+    label1 = 'min-variance' # min variance using eigenvectors
+    label2 = 'pca' # pca using eigenvectors: max variance portfolio
+    label3 = 'equi-weight' # equi-weight
+    label4 = 'volatility-weighted' # volatility-weighted
+    label5 = 'long-only' # long-only portfolio with minimal variance
+    label6 = 'markowitz-avg' # Markowitz with return = average of returns
+    label7 = 'markowitz-target' # Markowitz with return = target_return
+    
+    # compute covariance matrix
+    port_mgr = file_classes.portfolio_manager(rics, notional)
+    port_mgr.compute_covariance_matrix(bool_print=True)
+    
+    # compute vectors of returns and volatilities for Markowitz portfolios
+    min_returns = np.min(port_mgr.returns)
+    max_returns = np.max(port_mgr.returns)
+    returns = min_returns + np.linspace(0.1,0.9,100) * (max_returns-min_returns)
+    volatilities = np.zeros([len(returns),1])
+    counter = 0
+    for ret in returns:
+        port_markowitz = port_mgr.compute_portfolio('markowitz', ret)
+        volatilities[counter] = port_markowitz.volatility_annual
+        counter += 1
+        
+    # compute special portfolios
+    port1 = port_mgr.compute_portfolio(label1)
+    port2 = port_mgr.compute_portfolio(label2)
+    port3 = port_mgr.compute_portfolio(label3)
+    port4 = port_mgr.compute_portfolio(label4)
+    port5 = port_mgr.compute_portfolio(label5)
+    port6 = port_mgr.compute_portfolio('markowitz')
+    port7 = port_mgr.compute_portfolio('markowitz', target_return)
+    
+    # create scatterplots of portfolios: volatility vs return
+    x1 = port1.volatility_annual
+    y1 = port1.return_annual
+    x2 = port2.volatility_annual
+    y2 = port2.return_annual
+    x3 = port3.volatility_annual
+    y3 = port3.return_annual
+    x4 = port4.volatility_annual
+    y4 = port4.return_annual
+    x5 = port5.volatility_annual
+    y5 = port5.return_annual
+    x6 = port6.volatility_annual
+    y6 = port6.return_annual
+    x7 = port7.volatility_annual
+    y7 = port7.return_annual
+    
+    # plot Efficient Frontier
+    plt.figure()
+    plt.title('Efficient Frontier for a portfolio including ' + rics[0])
+    plt.scatter(volatilities,returns)
+    if include_min_variance:
+        plt.plot(x1, y1, "ok", label=label1) # black cross
+    plt.plot(x2, y2, "^r", label=label2) # red dot
+    plt.plot(x3, y3, "^y", label=label3) # yellow square
+    plt.plot(x4, y4, "^k", label=label4) # black square
+    plt.plot(x5, y5, "sy", label=label5) # yellow triangle
+    plt.plot(x6, y6, "sr", label=label6) # red squre
+    plt.plot(x7, y7, "sk", label=label7) # black square
+    plt.ylabel('portfolio return')
+    plt.xlabel('portfolio volatility')
+    plt.grid()
+    if include_min_variance:
+        plt.legend(loc='best')
+    else:
+        plt.legend(loc='upper right',  borderaxespad=0.)
+    plt.show()
+    
+    dict_portfolios = {label1: port1,
+                       label2: port2,
+                       label3: port3,
+                       label4: port4,
+                       label5: port5,
+                       label6: port6,
+                       label7: port7}
+    
+    return dict_portfolios
