@@ -27,12 +27,16 @@ importlib.reload(file_functions)
 # rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
 #         'GLE.PA','HSBA.L','SAN.MC','UBSG.SW']
 # rics = ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP']
-rics = ['SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
+# rics = ['SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
+# rics = ['^GSPC','^VIX']
+# rics = ['^FTSE','^GDAXI','^FCHI','^STOXX50E']
+rics = ['CAD=X','CHF=X','CNY=X','EURUSD=X','GBPUSD=X',\
+        'JPY=X','MXN=X','NOK=X','SEK=X']
 
 # input params
 notional = 300 # mnUSD
-target_return = 0.36 # 0.01 0.04 0.33
-include_min_variance=False
+target_return = 0.015 # 0.01 0.04 0.36 0.6 0.05 0.015
+include_min_variance=True
 
 # efficient frontier
 dict_portfolios = file_functions.compute_efficient_frontier(rics, notional, target_return, include_min_variance)
