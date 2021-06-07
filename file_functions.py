@@ -197,20 +197,20 @@ def compute_price_black_scholes(inputs):
 
 
 def compute_price_monte_carlo(inputs, number_simulations, call_or_put):
-        price = float(inputs.price)
-        t = float(inputs.time)
-        sim_normal = np.random.standard_normal(number_simulations)
-        time_to_maturity = max(inputs.maturity - t, 0.0)
-        sim_prices = price*np.exp(inputs.volatility*sim_normal*np.sqrt(time_to_maturity)\
-                           +(inputs.interest_rate-0.5*inputs.volatility**2)*time_to_maturity)
-        if inputs.call_or_put == 'call':
-            sim_payoffs = np.array([max(s - inputs.strike, 0.0) for s in sim_prices])
-        elif inputs.call_or_put == 'put':
-            sim_payoffs = np.array([max(inputs.strike - s, 0.0) for s in sim_prices])
-        else:
-            sim_payoffs = np.nan
-        sim_payoffs *= np.exp(-inputs.interest_rate*time_to_maturity) # present value
-        mc = file_classes.montecarlo_item(sim_prices, sim_payoffs, inputs.strike, inputs.call_or_put)
-        
-        return mc
+    price = float(inputs.price)
+    t = float(inputs.time)
+    sim_normal = np.random.standard_normal(number_simulations)
+    time_to_maturity = max(inputs.maturity - t, 0.0)
+    sim_prices = price*np.exp(inputs.volatility*sim_normal*np.sqrt(time_to_maturity)\
+                       +(inputs.interest_rate-0.5*inputs.volatility**2)*time_to_maturity)
+    if inputs.call_or_put == 'call':
+        sim_payoffs = np.array([max(s - inputs.strike, 0.0) for s in sim_prices])
+    elif inputs.call_or_put == 'put':
+        sim_payoffs = np.array([max(inputs.strike - s, 0.0) for s in sim_prices])
+    else:
+        sim_payoffs = np.nan
+    sim_payoffs *= np.exp(-inputs.interest_rate*time_to_maturity) # present value
+    mc = file_classes.montecarlo_item(sim_prices, sim_payoffs, inputs.strike, inputs.call_or_put)
+    
+    return mc
     
