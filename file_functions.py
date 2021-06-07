@@ -196,7 +196,7 @@ def compute_price_black_scholes(inputs):
     return price
 
 
-def compute_price_monte_carlo(inputs, number_simulations, call_or_put):
+def compute_price_monte_carlo(inputs, number_simulations):
     price = float(inputs.price)
     t = float(inputs.time)
     sim_normal = np.random.standard_normal(number_simulations)
