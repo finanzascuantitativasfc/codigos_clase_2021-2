@@ -566,3 +566,46 @@ class option_input:
         self.maturity = None
         self.strike = None
         self.call_or_put = None
+        
+        
+class montecarlo_item():
+    
+    def __init__(self, sim_prices, sim_payoffs, strike, call_or_put):
+        self.number_simulations = len(sim_payoffs)
+        self.sim_prices = sim_prices
+        self.sim_payoffs = sim_payoffs
+        self.call_or_put = call_or_put
+        self.mean = np.mean(sim_payoffs)
+        self.std = np.std(sim_payoffs)
+        self.confidence_radius = 1.96*self.std/np.sqrt(self.number_simulations)
+        self.confidence_interval =  self.mean + np.array([-1,1])*self.confidence_radius
+        if call_or_put == 'call':
+            self.proba_exercise = np.mean(sim_prices > strike)
+        elif call_or_put == 'put':
+            self.proba_exercise = np.mean(sim_prices < strike)
+        self.proba_profit = np.mean(sim_payoffs > self.mean)
+        self.distribution = None
+        
+        
+    def __str__(self):
+        str_self = 'Monte Carlo simulation for option pricing | ' + self.call_or_put + '\n'\
+            + 'number of simulations ' + str(self.number_simulations) + '\n'\
+            + 'confidence radius ' + str(self.confidence_radius) + '\n'\
+            + 'confidence interval ' + str(self.confidence_interval) + '\n'\
+            + 'price ' + str(self.mean)  + '\n'\
+            + 'probability of exercise ' + str(self.proba_exercise)  + '\n'\
+            + 'probability of profit ' + str(self.proba_profit)  + '\n'\
+                
+        return str_self
+    
+    
+    def plot_histogram(self):
+        inputs_distribution = file_classes.distribution_input()
+        dm = file_classes.distribution_manager(inputs_distribution)
+        dm.description = 'Monte Carlo distribution | option price | ' + self.call_or_put
+        dm.nb_rows = len(self.sim_payoffs)
+        dm.vec_returns = self.sim_payoffs
+        dm.compute() # compute returns and all different risk metrics
+        dm.plot_histogram() # plot histogram
+        print(dm) # write all data in console
+        

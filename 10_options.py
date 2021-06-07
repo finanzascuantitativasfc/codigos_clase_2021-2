@@ -21,13 +21,23 @@ importlib.reload(file_classes)
 
 # inputs
 inputs = file_classes.option_input()
-inputs.price = 102
+inputs.price = 19.7862
 inputs.time = 0.0 # in years
-inputs.volatility = 0.25
-inputs.interest_rate = 0.01
-inputs.maturity = 2/12 # in years
-inputs.strike = 100
-inputs.call_or_put = 'put'
+inputs.volatility = 0.1442
+inputs.interest_rate = 0.0158
+inputs.maturity = 3/12 # in years
+inputs.strike = 19.7862
+inputs.call_or_put = 'call'
+number_simulations = 1*10**6
 
-price_black_scholes_put = file_functions.compute_price_black_scholes(inputs)
+# price using Black-Scholes formula
+price_black_scholes = file_functions.compute_price_black_scholes(inputs)
+
+# price using Monte Carlo simulations
+prices_monte_carlo = file_functions.compute_price_monte_carlo(inputs, number_simulations, inputs.call_or_put)
+print(prices_monte_carlo)
+prices_monte_carlo.plot_histogram()
+
+
+
 
