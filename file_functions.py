@@ -179,19 +179,17 @@ def compute_efficient_frontier(rics, notional, target_return, include_min_varian
 
 def compute_price_black_scholes(inputs):
     time_to_maturity = inputs.maturity - inputs.time
-    price = float(max(0.0, inputs.price))
-    strike = float(max(0.0, inputs.strike))
     d1 = 1/(inputs.volatility*np.sqrt(time_to_maturity))\
-        * (np.log(price/strike) + (inputs.interest_rate + 0.5*inputs.volatility**2)*time_to_maturity)
+        * (np.log(inputs.price/inputs.strike) + (inputs.interest_rate + 0.5*inputs.volatility**2)*time_to_maturity)
     d2 = d1 - inputs.volatility*np.sqrt(time_to_maturity)
     if inputs.call_or_put == 'call':
         Nd1 = scipy.stats.norm.cdf(d1)
         Nd2 = scipy.stats.norm.cdf(d2)
-        price = Nd1*price - Nd2*strike*np.exp(-inputs.interest_rate*time_to_maturity)
+        price = Nd1*inputs.price - Nd2*inputs.strike*np.exp(-inputs.interest_rate*time_to_maturity)
     elif inputs.call_or_put == 'put':
         Nd1 = scipy.stats.norm.cdf(-d1)
         Nd2 = scipy.stats.norm.cdf(-d2)
-        price = Nd2*strike*np.exp(-inputs.interest_rate*time_to_maturity) - Nd1*price
+        price = Nd2*inputs.strike*np.exp(-inputs.interest_rate*time_to_maturity) - Nd1*inputs.price
         
     return price
 
@@ -213,4 +211,5 @@ def compute_price_monte_carlo(inputs, number_simulations):
     mc = file_classes.montecarlo_item(sim_prices, sim_payoffs, inputs.strike, inputs.call_or_put)
     
     return mc
+
     

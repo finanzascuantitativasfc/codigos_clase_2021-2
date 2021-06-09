@@ -24,10 +24,10 @@ importlib.reload(file_functions)
 inputs = file_classes.hedge_input()
 inputs.benchmark = '^STOXX50E'
 # inputs.security = 'ENI.MI'
-inputs.security = 'BBVA.MC'
-# inputs.hedge_securities =  ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP']
+inputs.security = 'REP.MC'
+inputs.hedge_securities =  ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','XOP']
 # inputs.hedge_securities =  ['EQNR.OL','REP.MC']
-inputs.hedge_securities =  ['^GDAXI','^FCHI']
+# inputs.hedge_securities =  ['^GDAXI','^FCHI']
 # inputs.hedge_securities =  ['^STOXX50E','^GDAXI','^FCHI']
 # inputs.hedge_securities =  ['^STOXX50E']
 inputs.delta_portfolio = 10 # mn USD
@@ -35,6 +35,6 @@ inputs.delta_portfolio = 10 # mn USD
 # computations
 hedge = file_classes.hedge_manager(inputs)
 hedge.load_betas() # get the betas for portfolio and hedges
-hedge.compute(regularisation=0.01) # numerical solution
+hedge.compute(regularisation=0.1) # numerical solution
 hedge_delta = hedge.hedge_delta
 hedge_beta_usd = hedge.hedge_beta_usd

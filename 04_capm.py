@@ -20,8 +20,8 @@ import file_functions
 importlib.reload(file_functions)
 
 # inputs
-benchmark = '^GSPC' # variable x
-security = '^VIX' # variable y
+benchmark = '^STOXX50E' # variable x
+security = '^FCHI' # variable y
 
 capm = file_classes.capm_manager(benchmark, security)
 capm.load_timeseries()

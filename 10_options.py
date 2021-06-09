@@ -26,7 +26,7 @@ inputs.time = 0.0 # in years
 inputs.volatility = 0.1442
 inputs.interest_rate = 0.0158
 inputs.maturity = 3/12 # in years
-inputs.strike = 19.7862
+inputs.strike = 25
 inputs.call_or_put = 'call'
 number_simulations = 1*10**6
 

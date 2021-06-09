@@ -23,8 +23,8 @@ import file_functions
 importlib.reload(file_functions)
 
 notional = 300 # mnUSD
-# rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
-#         'GLE.PA','HSBA.L','SAN.MC','UBSG.SW']
+rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
+        'GLE.PA','HSBA.L','SAN.MC','UBSG.SW']
 # rics = ['BARC.L','BBVA.MC','BNP.PA','CBK.DE','CSGN.SW','DBK.DE',\
 #         'GLE.PA','HSBA.L','SAN.MC','UBSG.SW','XLF']
 # rics = ['BARC.L','BNP.PA','XLF']
@@ -32,7 +32,7 @@ notional = 300 # mnUSD
 # rics = ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP',\
 #         'SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
 # rics = ['BP.L','ENI.MI','RDSa.AS','RDSa.L','EQNR.OL','REP.MC','XOP']
-rics = ['SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
+# rics = ['SGRE.MC','VWS.CO','ORSTED.CO','FSLR','NEE']
 
 port_mgr = file_classes.portfolio_manager(rics, notional)
 port_mgr.compute_covariance_matrix(bool_print=True)

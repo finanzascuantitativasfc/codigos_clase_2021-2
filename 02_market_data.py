@@ -18,7 +18,7 @@ from scipy.stats import skew, kurtosis, chi2
 # remember to modify the path to match your own directory
 directory = 'C:\\Users\Meva\\.spyder-py3\\data\\2021-2\\' # hardcoded
 # inputs
-ric = '^FCHI' # BBVA.MC MXN=X ^STOXX50E
+ric = 'MXN=X' # BBVA.MC MXN=X ^STOXX50E
 path = directory + ric + '.csv' 
 raw_data = pd.read_csv(path)
 

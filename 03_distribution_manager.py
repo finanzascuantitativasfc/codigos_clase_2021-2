@@ -18,8 +18,8 @@ import file_classes
 importlib.reload(file_classes)
 
 inputs = file_classes.distribution_input()
-inputs.data_type = 'real'
-inputs.variable_name = '^STOXX50E'
+inputs.data_type = 'simulation' # real simulation
+inputs.variable_name = 'chi-square'
 inputs.degrees_freedom = 9
 inputs.nb_sims = 10**6
 
